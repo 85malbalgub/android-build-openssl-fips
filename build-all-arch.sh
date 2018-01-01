@@ -2,6 +2,14 @@
 #
 # http://wiki.openssl.org/index.php/Android
 #
+# check fips mode
+FIPS=$1
+if [ "$FIPS" == "" ]; then	
+	FIPS=no
+fi
+
+OLD_PWD=$(pwd)
+
 set -e
 rm -rf prebuilt
 mkdir prebuilt
@@ -50,15 +58,52 @@ for arch in ${archs[@]}; do
 
     mkdir prebuilt/${arch}
 
+    chmod a+x setenv-android-mod.sh
     . ./setenv-android-mod.sh
 
     echo "CROSS COMPILE ENV : $CROSS_COMPILE"
-    cd openssl-1.0.1j
+	
+	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+	xCFLAGS2="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+	
+	#Prepare the OpenSSL Sources
+	# From the 'root' directory
+	if [ "$FIPS" == "yes" ]; then
+		rm -rf openssl-fips-2.0.16/
+		tar xzf openssl-fips-2.0.16.tar.gz
 
-    xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+		#Build the FIPS Object Module	
+		cd openssl-fips-2.0.16/
+
+		chmod 755 Configure
+		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS2 --openssldir=/data/Po7/openssl/out_fips/$ANDROID_API 
+		
+		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
+		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
+		# quote injection for proper SONAME, fuck...
+		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
+		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile		
+		
+		make
+		make install
+
+		# Execute after install
+#		cp $FIPS_SIG /usr/local/ssl/fips-2.0/bin
+#		mv /usr/local/ssl/fips-2.0/ /usr/local/ssl/$ANDROID_API
+
+		cd $OLD_PWD
+	fi
+
+	rm -rf openssl-1.0.2n/
+	tar xzf openssl-1.0.2n.tar.gz
+    cd openssl-1.0.2n
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-    ./Configure shared no-threads no-asm no-zlib no-ssl2 no-ssl3 no-comp no-hw no-engine --openssldir=/usr/local/ssl/android-19/ $configure_platform $xCFLAGS
+    if [ "$FIPS" == "yes" ]; then
+	./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/data/Po7/openssl/out/$ANDROID_API --with-fipsdir=/data/Po7/openssl/out_fips/$ANDROID_API --with-fipslibdir=/data/Po7/openssl/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+    else
+    	./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/usr/local/ssl/$ANDROID_API/ $configure_platform $xCFLAGS
+    fi
 
     # patch SONAME
 
@@ -67,14 +112,15 @@ for arch in ${archs[@]}; do
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
+	
     make clean
     make depend
     make all
 
     file libcrypto.so
     file libssl.so
-    cp libcrypto.so ../prebuilt/${arch}/libcrypto.so
-    cp libssl.so ../prebuilt/${arch}/libssl.so
+#    cp libcrypto.so ../prebuilt/${arch}/libcrypto.so
+#    cp libssl.so ../prebuilt/${arch}/libssl.so
     cd ..
 done
 exit 0
