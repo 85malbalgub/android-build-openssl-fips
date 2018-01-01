@@ -11,6 +11,14 @@ OUTPUT=$2
 if [ "$OUTPUT" == "" ]; then	
 	OUTPUT=/usr/local/ssl
 fi
+OPENSSL_FILE=$3
+if [ "$OPENSSL_FILE" == "" ]; then	
+	OPENSSL_FILE=openssl-1.0.2n
+fi
+FIPS_FILE=$4
+if [ "$FIPS_FILE" == "" ]; then	
+	FIPS_FILE=openssl-fips-2.0.16
+fi
 
 OLD_PWD=$(pwd)
 
@@ -18,7 +26,8 @@ set -e
 rm -rf prebuilt
 mkdir prebuilt
 
-archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
+#archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
+archs=(armeabi)
 
 for arch in ${archs[@]}; do
     xLIB="/lib"
@@ -68,19 +77,19 @@ for arch in ${archs[@]}; do
     echo "CROSS COMPILE ENV : $CROSS_COMPILE"
 	
 	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
-	xCFLAGS2="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+	xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
 	
 	#Prepare the OpenSSL Sources
 	# From the 'root' directory
-	if [ "$FIPS" == "yes" ]; then
-		rm -rf openssl-fips-2.0.16/
-		tar xzf openssl-fips-2.0.16.tar.gz
+	if [ "$FIPS" == "yes" ]; then	
+		rm -rf $FIPS_FILE/
+		tar xzf $FIPS_FILE.tar.gz
 
 		#Build the FIPS Object Module	
-		cd openssl-fips-2.0.16/
+		cd $FIPS_FILE/
 
 		chmod 755 Configure
-		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS2 --openssldir=$OUTPUT/out_fips/$ANDROID_API 
+		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
 		
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
@@ -97,16 +106,16 @@ for arch in ${archs[@]}; do
 
 		cd $OLD_PWD
 	fi
-
-	rm -rf openssl-1.0.2n/
-	tar xzf openssl-1.0.2n.tar.gz
-    cd openssl-1.0.2n
+	
+	rm -rf $OPENSSL_FILE/
+	tar xzf $OPENSSL_FILE.tar.gz
+    cd $OPENSSL_FILE/
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
     if [ "$FIPS" == "yes" ]; then
-	./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+		./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
-    	./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/usr/local/ssl/$ANDROID_API/ $configure_platform $xCFLAGS
+    	./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS
     fi
 
     # patch SONAME
