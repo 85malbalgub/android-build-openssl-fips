@@ -7,6 +7,10 @@ FIPS=$1
 if [ "$FIPS" == "" ]; then	
 	FIPS=no
 fi
+OUTPUT=$2
+if [ "$OUTPUT" == "" ]; then	
+	OUTPUT=/usr/local/ssl
+fi
 
 OLD_PWD=$(pwd)
 
@@ -76,7 +80,7 @@ for arch in ${archs[@]}; do
 		cd openssl-fips-2.0.16/
 
 		chmod 755 Configure
-		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS2 --openssldir=/data/Po7/openssl/out_fips/$ANDROID_API 
+		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS2 --openssldir=$OUTPUT/out_fips/$ANDROID_API 
 		
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
@@ -100,7 +104,7 @@ for arch in ${archs[@]}; do
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
     if [ "$FIPS" == "yes" ]; then
-	./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/data/Po7/openssl/out/$ANDROID_API --with-fipsdir=/data/Po7/openssl/out_fips/$ANDROID_API --with-fipslibdir=/data/Po7/openssl/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+	./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
     	./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/usr/local/ssl/$ANDROID_API/ $configure_platform $xCFLAGS
     fi
