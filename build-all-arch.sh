@@ -132,8 +132,18 @@ for arch in ${archs[@]}; do
 
     file libcrypto.so
     file libssl.so
-#    cp libcrypto.so ../prebuilt/${arch}/libcrypto.so
-#    cp libssl.so ../prebuilt/${arch}/libssl.so
+	mkdir $OUTPUT/${arch}
+	if [ "$FIPS" == "yes" ]; then	
+		mkdir $OUTPUT/${arch}/FIPS
+		cp libcrypto.so $OUTPUT/${arch}/FIPS/libcrypto.so
+		cp libssl.so $OUTPUT/${arch}/FIPS/libssl.so
+		cp -rf include $OUTPUT/${arch}/FIPS
+	else
+		mkdir $OUTPUT/${arch}
+		cp libcrypto.so $OUTPUT/${arch}/libcrypto.so
+		cp libssl.so $OUTPUT/${arch}/libssl.so
+		cp -rf include $OUTPUT/${arch}
+	fi
     cd ..
 done
 exit 0
