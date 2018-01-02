@@ -23,11 +23,10 @@ fi
 OLD_PWD=$(pwd)
 
 set -e
-rm -rf prebuilt
-mkdir prebuilt
+mkdir -p $OUTPUT
 
 #archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
-archs=(armeabi)
+archs=(armeabi arm64-v8a x86 x86_64)
 
 for arch in ${archs[@]}; do
     xLIB="/lib"
@@ -69,8 +68,6 @@ for arch in ${archs[@]}; do
             configure_platform="linux-elf" ;;
     esac
 
-    mkdir prebuilt/${arch}
-
     chmod a+x setenv-android-mod.sh
     . ./setenv-android-mod.sh
 
@@ -101,8 +98,8 @@ for arch in ${archs[@]}; do
 		make install
 
 		# Execute after install
-#		cp $FIPS_SIG /usr/local/ssl/fips-2.0/bin
-#		mv /usr/local/ssl/fips-2.0/ /usr/local/ssl/$ANDROID_API
+#		cp $FIPS_SIG $OUTPUT/out_fips/$ANDROID_API/fips-2.0/bin
+#		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
 
 		cd $OLD_PWD
 	fi
@@ -132,17 +129,16 @@ for arch in ${archs[@]}; do
 
     file libcrypto.so
     file libssl.so
-	mkdir $OUTPUT/${arch}
+	mkdir -p $OUTPUT/${arch}
 	if [ "$FIPS" == "yes" ]; then	
-		mkdir $OUTPUT/${arch}/FIPS
+		mkdir -p $OUTPUT/${arch}/FIPS
 		cp libcrypto.so $OUTPUT/${arch}/FIPS/libcrypto.so
 		cp libssl.so $OUTPUT/${arch}/FIPS/libssl.so
-		cp -rf include $OUTPUT/${arch}/FIPS
+		cp -rf include/ $OUTPUT/${arch}/FIPS/
 	else
-		mkdir $OUTPUT/${arch}
 		cp libcrypto.so $OUTPUT/${arch}/libcrypto.so
 		cp libssl.so $OUTPUT/${arch}/libssl.so
-		cp -rf include $OUTPUT/${arch}
+		cp -rf include/ $OUTPUT/${arch}/
 	fi
     cd ..
 done
