@@ -7,6 +7,10 @@ modified version of setenv-android.sh and build script support all architectures
 
 see details : http://wiki.openssl.org/index.php/Android
 
+- openssl : openssl-1.0.2n.tar.gz
+
+- openssl-fips : openssl-fips-ecp-2.0.16.tar.gz
+
 - checkpoint
 
 build-all-arch.sh
@@ -21,21 +25,17 @@ build-all-arch.sh
  
  arch
  
- 29 archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
+ 32 archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
 
 - compile options
 
- 78 xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/ -O3 -fomit-frame-pointer -Wall"
+ 79 xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/ -O3 -fomit-frame-pointer -Wall"
  
- 79 xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+ 80 xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
 
 - openssl options
 
- 91 ./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
- 
- 115 ./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
- 
- 117 ./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=/usr/local/ssl/$ANDROID_API/ $configure_platform $xCFLAGS
+ 29 OPENSSL_OPTION="no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m"
 
 - Caution 
 
