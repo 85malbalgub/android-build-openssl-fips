@@ -4,7 +4,7 @@ Android용 openssl(fips)을 빌드하는 방법
 
 테스트 환경 : CentOS release 6.7
 
-Openssl : openssl-1.0.2n, openssl-fips-2.0.16
+Openssl : openssl-1.0.2n, openssl-fips-ecp-2.0.16(특허 문제)
 
 NDK : r13b
 
@@ -21,7 +21,7 @@ NDK : r13b
 1. fips mode : fips 지원 라이브러리를 만듬
 2. 출력물 폴더 
 3. openssl version(openssl-1.0.2n)
-4. openssl-fips version(openssl-fips-2.0.16)
+4. openssl-fips version(openssl-fips-ecp-2.0.16)
 
 - 주의 
 fips모드로 x86-64는 실패하였고 확인 중입니다.
