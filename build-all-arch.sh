@@ -17,13 +17,16 @@ if [ "$OPENSSL_FILE" == "" ]; then
 fi
 FIPS_FILE=$4
 if [ "$FIPS_FILE" == "" ]; then	
-	FIPS_FILE=openssl-fips-2.0.16
+	FIPS_FILE=openssl-fips-ecp-2.0.16
 fi
 
 OLD_PWD=$(pwd)
 
 set -e
+rm -rf $OUTPUT
 mkdir -p $OUTPUT
+
+OPENSSL_OPTION="no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m"
 
 #archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
 archs=(armeabi arm64-v8a x86 x86_64)
@@ -86,7 +89,7 @@ for arch in ${archs[@]}; do
 		cd $FIPS_FILE/
 
 		chmod 755 Configure
-		./Configure no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
+		./Configure $OPENSSL_OPTION $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
 		
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
@@ -110,9 +113,9 @@ for arch in ${archs[@]}; do
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
     if [ "$FIPS" == "yes" ]; then
-		./Configure fips shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+		./Configure fips shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
-    	./Configure shared no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS
+    	./Configure shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS
     fi
 
     # patch SONAME
