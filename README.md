@@ -37,6 +37,4 @@ build-all-arch.sh
 
  29 OPENSSL_OPTION="no-ssl2 no-ssl3 no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m"
 
-- Caution 
 
- x86_64 not yet
