@@ -23,5 +23,3 @@ NDK : r13b
 3. openssl version(openssl-1.0.2n)
 4. openssl-fips version(openssl-fips-ecp-2.0.16)
 
-- 주의 
-fips모드로 x86-64는 실패하였고 확인 중입니다.
