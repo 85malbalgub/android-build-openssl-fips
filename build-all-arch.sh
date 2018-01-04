@@ -104,6 +104,8 @@ for arch in ${archs[@]}; do
 #		cp $FIPS_SIG $OUTPUT/out_fips/$ANDROID_API/fips-2.0/bin
 #		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
 
+		perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld
+		
 		cd $OLD_PWD
 	fi
 	
@@ -112,7 +114,7 @@ for arch in ${archs[@]}; do
     cd $OPENSSL_FILE/
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-    if [ "$FIPS" == "yes" ]; then
+    if [ "$FIPS" == "yes" ]; then		
 		./Configure fips shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
     	./Configure shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS
