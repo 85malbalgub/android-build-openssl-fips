@@ -132,23 +132,19 @@ for arch in ${archs[@]}; do
     make depend
     make all
 
-    file libcrypto.so
-    file libssl.so
-	mkdir -p $OUTPUT/${arch}
-	if [ "$FIPS" == "yes" ]; then	
-		mkdir -p $OUTPUT/${arch}/FIPS
-		cp libcrypto.so $OUTPUT/${arch}/FIPS/libcrypto.so
-		cp libssl.so $OUTPUT/${arch}/FIPS/libssl.so
-		cp -rf include/ $OUTPUT/${arch}/FIPS/
-		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/FIPS/libcrypto.so
-		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/FIPS/libssl.so
-	else
-		cp libcrypto.so $OUTPUT/${arch}/libcrypto.so
-		cp libssl.so $OUTPUT/${arch}/libssl.so
-		cp -rf include/ $OUTPUT/${arch}/
-		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/libcrypto.so
-		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/libssl.so
-	fi
+    DEST_PATH=$OUTPUT/${arch}
+    mkdir -p ${DEST_PATH}
+    if [ "$FIPS" == "yes" ]; then	
+        DEST_PATH=${DEST_PATH}/FIPS
+        mkdir -p ${DEST_PATH}
+    fi    
+    cp libcrypto.so ${DEST_PATH}/
+    cp libssl.so ${DEST_PATH}/
+    cp -rf include/ ${DEST_PATH}/
+    ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
+    ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
+    file ${DEST_PATH}/libcrypto.so
+    file ${DEST_PATH}/libssl.so
     cd ..
 done
 exit 0
