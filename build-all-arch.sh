@@ -44,7 +44,7 @@ for arch in ${archs[@]}; do
             _ANDROID_ARCH=arch-arm64
             _ANDROID_EABI=aarch64-linux-android-4.9
             #no xLIB="/lib64"
-            configure_platform="linux-generic64 -DB_ENDIAN" ;;
+            configure_platform="linux-generic64" ;;
         "mips")
             _ANDROID_TARGET_SELECT=arch-mips
             _ANDROID_ARCH=arch-mips
@@ -140,10 +140,14 @@ for arch in ${archs[@]}; do
 		cp libcrypto.so $OUTPUT/${arch}/FIPS/libcrypto.so
 		cp libssl.so $OUTPUT/${arch}/FIPS/libssl.so
 		cp -rf include/ $OUTPUT/${arch}/FIPS/
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/FIPS/libcrypto.so
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/FIPS/libssl.so
 	else
 		cp libcrypto.so $OUTPUT/${arch}/libcrypto.so
 		cp libssl.so $OUTPUT/${arch}/libssl.so
 		cp -rf include/ $OUTPUT/${arch}/
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/libcrypto.so
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip $OUTPUT/${arch}/libssl.so
 	fi
     cd ..
 done
