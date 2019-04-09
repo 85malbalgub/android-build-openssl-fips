@@ -140,7 +140,7 @@ for arch in ${archs[@]}; do
     fi    
     cp libcrypto.so ${DEST_PATH}/
     cp libssl.so ${DEST_PATH}/
-    cp -rf include/ ${DEST_PATH}/
+    cp -rfl include/ ${DEST_PATH}/
     ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
     ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
     file ${DEST_PATH}/libcrypto.so
