@@ -128,6 +128,16 @@ for arch in ${archs[@]}; do
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
 	
+	//modify secure coding
+    cp -f crypto/mem.c crypto/mem_old.c
+    cat crypto/mem.c | sed 's/strcpy(ret, str);/memset(ret, 0, strlen(str) + 1);\
+    \#ifdef _WIN32\
+    strcpy_s(ret, str, strlen(str));\
+    \#else	\
+    strncpy(ret, str, strlen(str));\
+    \#endif/g' > mem_new.c	
+    cp -f mem_new.c crypto/mem.c
+
     make clean
     make depend
     make all
