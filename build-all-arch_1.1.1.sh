@@ -94,6 +94,7 @@ fi
 		chmod 755 Configure
 		./Configure $OPENSSL_OPTION $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
 		
+		cp -f Makefile Makefile_org
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_VERSION_NUMBER\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
@@ -126,7 +127,9 @@ fi
 
     # patch SONAME
 
+    cp -f Makefile Makefile_org
     perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
+    perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_VERSION_NUMBER\)/SHLIB_EXT=\.so/g' Makefile
     perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
