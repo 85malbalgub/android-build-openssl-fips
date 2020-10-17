@@ -100,7 +100,8 @@ fi
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
-		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile		
+		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
+		perl -pi -e 's/-DNDEBUG/-DNDEBUG -DOPENSSL_API_COMPAT=0x10100000L/g' Makefile
 		
 		make
 		make install
@@ -134,6 +135,7 @@ fi
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
+    perl -pi -e 's/-DNDEBUG/-DNDEBUG -DOPENSSL_API_COMPAT=0x10100000L/g' Makefile
 	
     #modify secure coding
     cp -f crypto/mem.c crypto/mem_old.c
