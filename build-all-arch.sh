@@ -82,6 +82,7 @@ for arch in ${archs[@]}; do
 	#Prepare the OpenSSL Sources
 	# From the 'root' directory
 	if [ "$FIPS" == "yes" ]; then	
+		echo "Fips build start"
 		rm -rf $FIPS_FILE/
 		tar xzf $FIPS_FILE.tar.gz
 
@@ -89,6 +90,7 @@ for arch in ${archs[@]}; do
 		cd $FIPS_FILE/
 
 		chmod 755 Configure
+		echo "./Configure $OPENSSL_OPTION $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API"
 		./Configure $OPENSSL_OPTION $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
 		
 		cp -f Makefile Makefile_org
@@ -99,15 +101,19 @@ for arch in ${archs[@]}; do
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
 		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile		
 		
+		echo "make"
 		make
+		echo "make install"
 		make install
 
 		# Execute after install
 #		cp $FIPS_SIG $OUTPUT/out_fips/$ANDROID_API/fips-2.0/bin
 #		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
 
+		echo "perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld"
 		perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld
 		
+		echo "Fips build end"
 		cd $OLD_PWD
 	fi
 	
@@ -116,9 +122,11 @@ for arch in ${archs[@]}; do
     cd $OPENSSL_FILE/
 
     perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-    if [ "$FIPS" == "yes" ]; then		
-		./Configure fips shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+    if [ "$FIPS" == "yes" ]; then
+    	echo "./Configure fips shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS"
+	./Configure fips shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
+    	echo "./Configure shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS"
     	./Configure shared $OPENSSL_OPTION --openssldir=$OUTPUT/out/$ANDROID_API/ $configure_platform $xCFLAGS
     fi
 
@@ -142,8 +150,11 @@ for arch in ${archs[@]}; do
     \#endif/g' > mem_new.c	
     cp -f mem_new.c crypto/mem.c
 
+    echo "make clean"
     make clean
+    echo "make depend"    
     make depend
+    echo "make all"
     make all
 
     DEST_PATH=$OUTPUT/${arch}
@@ -157,7 +168,9 @@ for arch in ${archs[@]}; do
     cp -rfl include/ ${DEST_PATH}/
     ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
     ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
+    echo "Result : "
     file ${DEST_PATH}/libcrypto.so
+    echo "Result : "
     file ${DEST_PATH}/libssl.so
     cd ..
 done
