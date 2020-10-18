@@ -79,8 +79,8 @@ if [ "$ANDROID_NDK_HOME" == "" ]; then
 fi
         echo "CROSS COMPILE ENV : $CROSS_COMPILE"
 
-	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
-	xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall -DOPENSSL_API_COMPAT=0x10100000L"
+	xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall -DOPENSSL_API_COMPAT=0x10100000L"
 	
 	#Prepare the OpenSSL Sources
 	# From the 'root' directory
@@ -101,7 +101,6 @@ fi
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
 		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
-		perl -pi -e 's/-DNDEBUG/-DNDEBUG -DOPENSSL_API_COMPAT=0x10100000L/g' Makefile
 		
 		make
 		make install
@@ -135,7 +134,6 @@ fi
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
-    perl -pi -e 's/-DNDEBUG/-DNDEBUG -DOPENSSL_API_COMPAT=0x10100000L/g' Makefile
 	
     #modify secure coding
     cp -f crypto/mem.c crypto/mem_old.c
