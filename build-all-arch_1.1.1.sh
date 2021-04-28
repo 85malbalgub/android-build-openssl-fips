@@ -120,9 +120,9 @@ fi
 
 #    perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
     if [ "$FIPS" == "yes" ]; then		
-		./Configure fips shared $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs --openssldir=$OUTPUT/out/$ANDROID_API/SSL --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+		./Configure fips  $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs --openssldir=$OUTPUT/out/$ANDROID_API/SSL --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
-    	./Configure shared $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
+    	./Configure  $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
     fi
 
     # patch SONAME
