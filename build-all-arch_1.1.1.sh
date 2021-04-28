@@ -19,6 +19,10 @@ FIPS_FILE=$4
 if [ "$FIPS_FILE" == "" ]; then	
 	FIPS_FILE=openssl-fips-ecp-2.0.16
 fi
+SHARED_OPTION=$5
+if [ "$SHARED_OPTION" == "" ]; then	
+	SHARED_OPTION=shared
+fi
 
 OLD_PWD=$(pwd)
 
@@ -120,9 +124,9 @@ fi
 
 #    perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
     if [ "$FIPS" == "yes" ]; then		
-		./Configure fips  $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs --openssldir=$OUTPUT/out/$ANDROID_API/SSL --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
+		./Configure fips $SHARED_OPTION $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs --openssldir=$OUTPUT/out/$ANDROID_API/SSL --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
     else
-    	./Configure  $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
+    	./Configure $SHARED_OPTION $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
     fi
 
     # patch SONAME
@@ -159,14 +163,19 @@ fi
     if [ "$FIPS" == "yes" ]; then	
         DEST_PATH=${DEST_PATH}/FIPS
         mkdir -p ${DEST_PATH}
-    fi    
-    cp libcrypto.so ${DEST_PATH}/
-    cp libssl.so ${DEST_PATH}/
+    fi    	
+    cp -f libcrypto.* ${DEST_PATH}/
+    cp -f libssl.* ${DEST_PATH}/
     cp -rfl include/ ${DEST_PATH}/
-    ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
-    ${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
-    file ${DEST_PATH}/libcrypto.so
-    file ${DEST_PATH}/libssl.so
+	if [ "$SHARED_OPTION" == "shared" ]; then	
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
+		file ${DEST_PATH}/libcrypto.so
+		file ${DEST_PATH}/libssl.so
+	else
+		file ${DEST_PATH}/libcrypto.a
+		file ${DEST_PATH}/libssl.a
+	fi
     cd ..
 done
 exit 0
