@@ -20,7 +20,9 @@ if [ "$FIPS_FILE" == "" ]; then
 	FIPS_FILE=openssl-fips-ecp-2.0.16
 fi
 SHARED_OPTION=$5
-if [ "$SHARED_OPTION" == "" ]; then	
+if [ "$SHARED_OPTION" == "static" ]; then	
+	SHARED_OPTION=
+else
 	SHARED_OPTION=shared
 fi
 
