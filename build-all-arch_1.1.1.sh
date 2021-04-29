@@ -25,8 +25,9 @@ if [ "$SHARED_OPTION" == "static" ]; then
 else
 	SHARED_OPTION=shared
 fi
-
-_ANDROID_NDK="android-ndk-r18b"
+if [ "$_ANDROID_NDK" == "" ]; then	
+	_ANDROID_NDK="android-ndk-r13b"
+fi
 
 OLD_PWD=$(pwd)
 
