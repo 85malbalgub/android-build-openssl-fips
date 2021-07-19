@@ -25,6 +25,7 @@ if [ "$SHARED_OPTION" == "static" ]; then
 else
 	SHARED_OPTION=shared
 fi
+SONAME=$6
 if [ "$_ANDROID_NDK" == "" ]; then	
 	_ANDROID_NDK="android-ndk-r13b"
 fi
@@ -116,6 +117,9 @@ fi
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
 		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
+		if [ "$SONAME" == "" ]; then	
+		    perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}\crypto/g' Makefile
+		fi
 		
 		make
 		make install
@@ -149,6 +153,9 @@ fi
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
+    if [ "$SONAME" == "" ]; then	
+	perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}\crypto/g' Makefile
+    fi
 	
     #modify secure coding
     cp -f crypto/mem.c crypto/mem_old.c
