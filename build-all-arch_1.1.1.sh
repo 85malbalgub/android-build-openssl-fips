@@ -117,7 +117,7 @@ fi
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
 		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
-		if [ "$SONAME" == "" ]; then	
+		if [ "$SONAME" != "" ]; then	
 		    perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}\crypto/g' Makefile
 		fi
 		
@@ -153,7 +153,7 @@ fi
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
-    if [ "$SONAME" == "" ]; then	
+    if [ "$SONAME" != "" ]; then	
 	perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}\crypto/g' Makefile
     fi
 	
