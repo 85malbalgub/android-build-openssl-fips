@@ -130,7 +130,7 @@ for arch in ${archs[@]}; do
 #		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
 
 		echo "perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld"
-		perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld
+		perl -pi -e 's/\"\$\{FIPS_SIG\}\" \"\$\{TARGET\}\"/\"\$\{FIPS_SIG\}\" -exe \"\$\{TARGET\}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld
 		
 		echo "Fips build end"
 		cd $OLD_PWD
