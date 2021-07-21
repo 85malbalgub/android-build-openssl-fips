@@ -25,7 +25,7 @@ if [ "$SHARED_OPTION" == "static" ]; then
 else
 	SHARED_OPTION=shared
 fi
-
+SONAME=$6
 if [ "$_ANDROID_NDK" == "" ]; then	
 	_ANDROID_NDK="android-ndk-r13b"
 fi
@@ -115,7 +115,10 @@ for arch in ${archs[@]}; do
 		perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
-		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile		
+		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
+		if [ "$SONAME" != "" ]; then	
+		    perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
+		fi
 		
 		echo "make"
 		make
@@ -155,7 +158,10 @@ for arch in ${archs[@]}; do
     # quote injection for proper SONAME, fuck...
     perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
     perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
-	
+    if [ "$SONAME" != "" ]; then	
+	perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
+    fi
+    
     #modify secure coding
     cp -f crypto/mem.c crypto/mem_old.c
     cat crypto/mem.c | sed 's/strcpy(ret, str);/memset(ret, 0, strlen(str) + 1);\
