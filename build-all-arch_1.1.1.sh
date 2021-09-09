@@ -185,7 +185,8 @@ fi
     cp -f libcrypto.* ${DEST_PATH}/
     cp -f libssl.* ${DEST_PATH}/
     cp -rfl include/ ${DEST_PATH}/
-	if [ "$SHARED_OPTION" == "shared" ]; then	
+	if [ "$SHARED_OPTION" == "shared" ]; then
+		mv -f ${DEST_PATH}/libcrypto.so ${DEST_PATH}/lib${SONAME}crypto.so
 		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
 		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
 		file ${DEST_PATH}/libcrypto.so
