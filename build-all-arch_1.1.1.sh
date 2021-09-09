@@ -189,9 +189,9 @@ for arch in ${archs[@]}; do
 		if [[ "$SONAME" != "" ]]; then
 			mv -f ${DEST_PATH}/libcrypto.so ${DEST_PATH}/lib${SONAME}crypto.so
 		fi
-		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
+		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/lib${SONAME}crypto.so
 		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
-		file ${DEST_PATH}/libcrypto.so
+		file ${DEST_PATH}/lib${SONAME}crypto.so
 		file ${DEST_PATH}/libssl.so
 	else
 		file ${DEST_PATH}/libcrypto.a
