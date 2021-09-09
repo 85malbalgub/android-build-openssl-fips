@@ -4,29 +4,29 @@
 #
 # check fips mode
 FIPS=$1
-if [ "$FIPS" == "" ]; then	
+if [[ "$FIPS" == "" ]]; then
 	FIPS=no
 fi
 OUTPUT=$2
-if [ "$OUTPUT" == "" ]; then	
+if [[ "$OUTPUT" == "" ]]; then
 	OUTPUT=/usr/local/ssl
 fi
 OPENSSL_FILE=$3
-if [ "$OPENSSL_FILE" == "" ]; then	
+if [[ "$OPENSSL_FILE" == "" ]]; then
 	OPENSSL_FILE=openssl-1.0.2n
 fi
 FIPS_FILE=$4
-if [ "$FIPS_FILE" == "" ]; then	
+if [[ "$FIPS_FILE" == "" ]]; then
 	FIPS_FILE=openssl-fips-ecp-2.0.16
 fi
 SHARED_OPTION=$5
-if [ "$SHARED_OPTION" == "static" ]; then	
+if [[ "$SHARED_OPTION" == "static" ]]; then
 	SHARED_OPTION=
 else
 	SHARED_OPTION=shared
 fi
 SONAME=$6
-if [ "$_ANDROID_NDK" == "" ]; then	
+if [[ "$_ANDROID_NDK" == "" ]]; then
 	_ANDROID_NDK="android-ndk-r13b"
 fi
 
@@ -87,20 +87,20 @@ for arch in ${archs[@]}; do
             configure_platform="linux-elf" ;;
     esac
 
-    chmod a+x setenv-android-mod.sh
-    . ./setenv-android-mod.sh
+	chmod a+x setenv-android-mod.sh
+	. ./setenv-android-mod.sh
 
-if [ "$ANDROID_NDK_HOME" == "" ]; then	
-	export ANDROID_NDK_HOME="$ANDROID_NDK_ROOT"
-fi
-        echo "CROSS COMPILE ENV : $CROSS_COMPILE"
+	if [[ "$ANDROID_NDK_HOME" == "" ]]; then	
+		export ANDROID_NDK_HOME="$ANDROID_NDK_ROOT"
+	fi
+	echo "CROSS COMPILE ENV : $CROSS_COMPILE"
 
 	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall -DOPENSSL_API_COMPAT=0x10100000L"
 	xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall -DOPENSSL_API_COMPAT=0x10100000L"
 	
 	#Prepare the OpenSSL Sources
 	# From the 'root' directory
-	if [ "$FIPS" == "yes" ]; then	
+	if [[ "$FIPS" == "yes" ]]; then	
 		rm -rf $FIPS_FILE/
 		tar xzf $FIPS_FILE.tar.gz
 
@@ -109,7 +109,7 @@ fi
 
 		chmod 755 Configure
 		./Configure $OPENSSL_OPTION $configure_platform $xCFLAGS_FIPS --openssldir=$OUTPUT/out_fips/$ANDROID_API 
-		
+
 		cp -f Makefile Makefile_org
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
 		perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_VERSION_NUMBER\)/SHLIB_EXT=\.so/g' Makefile
@@ -117,76 +117,78 @@ fi
 		# quote injection for proper SONAME, fuck...
 		perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
 		perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile	
-		if [ "$SONAME" != "" ]; then	
-		    perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
+		if [[ "$SONAME" != "" ]]; then	
+			perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
 		fi
-		
+
 		make
 		make install
 
 		# Execute after install
-#		cp $FIPS_SIG $OUTPUT/out_fips/$ANDROID_API/fips-2.0/bin
-#		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
+		#		cp $FIPS_SIG $OUTPUT/out_fips/$ANDROID_API/fips-2.0/bin
+		#		mv /usr/local/ssl/fips-2.0/ $OUTPUT/$ANDROID_API
 
 		perl -pi -e 's/\"\${FIPS_SIG}\" \"\${TARGET}\"/\"\${FIPS_SIG}\" -exe \"\${TARGET}\"/g' $OUTPUT/out_fips/$ANDROID_API/bin/fipsld
-		
+
 		cd $OLD_PWD
 	fi
-	
+
 	rm -rf $OPENSSL_FILE/
 	tar xzf $OPENSSL_FILE.tar.gz
-    cd $OPENSSL_FILE/
+	cd $OPENSSL_FILE/
 
-#    perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-    if [ "$FIPS" == "yes" ]; then		
+	#    perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
+	if [[ "$FIPS" == "yes" ]]; then		
 		./Configure fips $SHARED_OPTION $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs --openssldir=$OUTPUT/out/$ANDROID_API/SSL --with-fipsdir=$OUTPUT/out_fips/$ANDROID_API --with-fipslibdir=$OUTPUT/out_fips/$ANDROID_API/lib/ $configure_platform $xCFLAGS
-    else
-    	./Configure $SHARED_OPTION $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
-    fi
+	else
+		./Configure $SHARED_OPTION $OPENSSL_OPTION --prefix=$OUTPUT/out/$ANDROID_API/libs/ --openssldir=$OUTPUT/out/$ANDROID_API/SSL/ $configure_platform $xCFLAGS
+	fi
 
-    # patch SONAME
+	# patch SONAME
 
-    cp -f Makefile Makefile_org
-    perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
-    perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_VERSION_NUMBER\)/SHLIB_EXT=\.so/g' Makefile
-    perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
-    # quote injection for proper SONAME, fuck...
-    perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
-    perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
-    if [ "$SONAME" != "" ]; then	
-	perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
-    fi
-	
-    #modify secure coding
-    cp -f crypto/mem.c crypto/mem_old.c
-    cat crypto/mem.c | sed 's/strcpy(ret, str);/memset(ret, 0, strlen(str) + 1);\
-    \#ifdef _WIN32\
-    strcpy_s(ret, str, strlen(str));\
-    \#else	\
-    strncpy(ret, str, strlen(str));\
-    \#endif/g' > mem_new.c	
-    cp -f mem_new.c crypto/mem.c
+	cp -f Makefile Makefile_org
+	perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_MAJOR\)\.\$\(SHLIB_MINOR\)/SHLIB_EXT=\.so/g' Makefile
+	perl -pi -e 's/SHLIB_EXT=\.so\.\$\(SHLIB_VERSION_NUMBER\)/SHLIB_EXT=\.so/g' Makefile
+	perl -pi -e 's/SHARED_LIBS_LINK_EXTS=\.so\.\$\(SHLIB_MAJOR\) \.so//g' Makefile
+	# quote injection for proper SONAME, fuck...
+	perl -pi -e 's/SHLIB_MAJOR=1/SHLIB_MAJOR=`/g' Makefile
+	perl -pi -e 's/SHLIB_MINOR=0.0/SHLIB_MINOR=`/g' Makefile
+	if [[ "$SONAME" != "" ]]; then	
+		perl -pi -e 's/soname=libcrypto/soname=lib\${SONAME}crypto/g' Makefile
+	fi
 
-    #modify sk_free
-    cp -f include/openssl/stack.h include/openssl/stack_old.h
-    cat include/openssl/stack.h | sed 's/if /if 0\n/'> stack_new.h
-    cp -f stack_new.h include/openssl/stack.h
+	#modify secure coding
+	cp -f crypto/mem.c crypto/mem_old.c
+	cat crypto/mem.c | sed 's/strcpy(ret, str);/memset(ret, 0, strlen(str) + 1);\
+	\#ifdef _WIN32\
+	strcpy_s(ret, str, strlen(str));\
+	\#else	\
+	strncpy(ret, str, strlen(str));\
+	\#endif/g' > mem_new.c	
+	cp -f mem_new.c crypto/mem.c
+
+	#modify sk_free
+	cp -f include/openssl/stack.h include/openssl/stack_old.h
+	cat include/openssl/stack.h | sed 's/if /if 0\n/'> stack_new.h
+	cp -f stack_new.h include/openssl/stack.h
 
     make clean
     make depend
     make all
 
-    DEST_PATH=$OUTPUT/${arch}
-    mkdir -p ${DEST_PATH}
-    if [ "$FIPS" == "yes" ]; then	
-        DEST_PATH=${DEST_PATH}/FIPS
-        mkdir -p ${DEST_PATH}
-    fi    	
-    cp -f libcrypto.* ${DEST_PATH}/
-    cp -f libssl.* ${DEST_PATH}/
-    cp -rfl include/ ${DEST_PATH}/
-	if [ "$SHARED_OPTION" == "shared" ]; then
-		mv -f ${DEST_PATH}/libcrypto.so ${DEST_PATH}/lib${SONAME}crypto.so
+	DEST_PATH=$OUTPUT/${arch}
+	mkdir -p ${DEST_PATH}
+	if [[ "$FIPS" == "yes" ]]; then	
+		DEST_PATH=${DEST_PATH}/FIPS
+		mkdir -p ${DEST_PATH}
+	fi    	
+	cp -f libcrypto.* ${DEST_PATH}/
+	cp -f libssl.* ${DEST_PATH}/
+	cp -rfl include/ ${DEST_PATH}/
+	if [[ "$SHARED_OPTION" == "shared" ]]; then
+		if [[ "$SONAME" != "" ]]; then
+			mv -f ${DEST_PATH}/libcrypto.so ${DEST_PATH}/lib${SONAME}crypto.so
+		fi
 		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libcrypto.so
 		${ANDROID_TOOLCHAIN}/${CROSS_COMPILE}strip ${DEST_PATH}/libssl.so
 		file ${DEST_PATH}/libcrypto.so
@@ -195,7 +197,6 @@ fi
 		file ${DEST_PATH}/libcrypto.a
 		file ${DEST_PATH}/libssl.a
 	fi
-    cd ..
+	cd ..
 done
 exit 0
-
