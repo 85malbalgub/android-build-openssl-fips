@@ -99,8 +99,7 @@ for arch in ${archs[@]}; do
 	fi
 	echo "CROSS COMPILE ENV : $CROSS_COMPILE"
 
-	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
-	xCFLAGS_FIPS="-fPIC -DOPENSSL_PIC -DDSO_DLFCN -DHAVE_DLFCN_H -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
+	xCFLAGS="-DSHARED_EXTENSION=.so -fPIC -DOPENSSL_PIC -mandroid -I$ANDROID_DEV/include -B$ANDROID_DEV/$xLIB -O3 -fomit-frame-pointer -Wall"
 		
 	rm -rf $OPENSSL_FILE/
 	tar xzf $OPENSSL_FILE.tar.gz
