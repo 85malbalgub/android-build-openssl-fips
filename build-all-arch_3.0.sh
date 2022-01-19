@@ -37,9 +37,9 @@ rm -rf $OUTPUT
 mkdir -p $OUTPUT
 
 if [[ "$FIPS" == "no" ]]; then
-	OPENSSL_OPTION="no-ssl no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m"
+	OPENSSL_OPTION="no-asm no-ssl no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m"
 else
-	OPENSSL_OPTION="no-ssl no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m enable-fips"
+	OPENSSL_OPTION="no-asm no-ssl no-comp no-hw no-engine no-idea no-mdc2 no-rc5 no-ec2m enable-fips"
 fi
 
 #archs=(armeabi arm64-v8a mips mips64 x86 x86_64)
