@@ -133,7 +133,11 @@ for arch in ${archs[@]}; do
 
 	#modify sk_free
 	cp -f include/openssl/stack.h include/openssl/stack_old.h
-	cat include/openssl/stack.h | sed 's/if /if 0\n/ | sed 's/ifndef OPENSSL_NO_DEPRECATED_1_1_0/if 0\nndef OPENSSL_NO_DEPRECATED_1_1_0/ > stack_new.h
+	if [[ "$OPENSSL_FILE" == "openssl-1."* ]]; then
+		cat include/openssl/stack.h | sed 's/if /if 0\n/'> stack_new.h
+	else
+		cat include/openssl/stack.h | sed 's/ifndef OPENSSL_NO_DEPRECATED_1_1_0/if 0\n/'> stack_new.h
+	fi
 	cp -f stack_new.h include/openssl/stack.h
 
     make clean
